@@ -127,7 +127,11 @@ export default {
       progress_ms: res.progress_ms,
       url: res.item?.external_urls?.spotify,
     };
-    return Response.json(nowPlaying);
+    return Response.json(nowPlaying, {
+      headers: {
+        'Access-Control-Allow-Origin': 'https://eyrin.jp',
+      },
+    });
   },
 
   // 30分ごとにAccess Tokenを更新
