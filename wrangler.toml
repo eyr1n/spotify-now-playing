@@ -10,5 +10,5 @@ id = "42b3d8e238164f89966d351af22e5958"
 crons = ["*/30 * * * *"]
 
 [[routes]]
-pattern = "now-playing.eyrin.jp"
+pattern = "nowplaying.eyrin.jp"
 custom_domain = true
