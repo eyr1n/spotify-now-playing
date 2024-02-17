@@ -5,7 +5,7 @@ interface Env {
   KV: KVNamespace;
 }
 
-interface SpotifyCurrentlyPlaying {
+interface SpotifyAPIResponse {
   progress_ms?: number | null;
   is_playing?: boolean;
   item?: {
@@ -34,7 +34,7 @@ interface SpotifyCurrentlyPlaying {
   } | null;
 }
 
-interface WorkerCurrentlyPlaying {
+interface SpotifyNowPlaying {
   album: {
     name?: string;
     url?: string;
@@ -72,7 +72,7 @@ export default {
         );
       }
 
-      const response: { access_token: string; refresh_token: string } = await fetch('https://accounts.spotify.com/api/token', {
+      const res: { access_token: string; refresh_token: string } = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -90,12 +90,12 @@ export default {
         return res.json();
       });
 
-      await env.KV.put('access-token', response.access_token);
-      await env.KV.put('refresh-token', response.refresh_token);
+      await env.KV.put('access-token', res.access_token);
+      await env.KV.put('refresh-token', res.refresh_token);
 
       return Response.json({
-        access_token: response.access_token,
-        refresh_token: response.refresh_token,
+        access_token: res.access_token,
+        refresh_token: res.refresh_token,
       });
     }
 
@@ -104,7 +104,7 @@ export default {
       throw new Error('access-token is null');
     }
 
-    const spotifyResponse: SpotifyCurrentlyPlaying = await fetch('https://api.spotify.com/v1/me/player/currently-playing?market=JP', {
+    const res: SpotifyAPIResponse = await fetch('https://api.spotify.com/v1/me/player/currently-playing?market=JP', {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
     }).then((res) => {
@@ -117,17 +117,17 @@ export default {
       return res.json();
     });
 
-    const workerResponse: WorkerCurrentlyPlaying = {
-      album: { name: spotifyResponse.item?.album?.name, url: spotifyResponse?.item?.album?.external_urls.spotify },
-      artists: spotifyResponse.item?.artists?.map((artist) => ({ name: artist.name, url: artist.external_urls?.spotify })) ?? [],
-      duration_ms: spotifyResponse.item?.duration_ms,
-      images: spotifyResponse.item?.album?.images.map((image) => ({ url: image.url, height: image.height, width: image.width })) ?? [],
-      is_playing: spotifyResponse.is_playing,
-      name: spotifyResponse.item?.name,
-      progress_ms: spotifyResponse.progress_ms,
-      url: spotifyResponse.item?.external_urls?.spotify,
+    const nowPlaying: SpotifyNowPlaying = {
+      album: { name: res.item?.album?.name, url: res?.item?.album?.external_urls.spotify },
+      artists: res.item?.artists?.map((artist) => ({ name: artist.name, url: artist.external_urls?.spotify })) ?? [],
+      duration_ms: res.item?.duration_ms,
+      images: res.item?.album?.images.map((image) => ({ url: image.url, height: image.height, width: image.width })) ?? [],
+      is_playing: res.is_playing,
+      name: res.item?.name,
+      progress_ms: res.progress_ms,
+      url: res.item?.external_urls?.spotify,
     };
-    return Response.json(workerResponse);
+    return Response.json(nowPlaying);
   },
 
   // 30分ごとにAccess Tokenを更新
@@ -137,7 +137,7 @@ export default {
       throw new Error('refresh-token is null');
     }
 
-    const response: { access_token: string; refresh_token?: string } = await fetch('https://accounts.spotify.com/api/token', {
+    const res: { access_token: string; refresh_token?: string } = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -155,9 +155,9 @@ export default {
       return res.json();
     });
 
-    await env.KV.put('access-token', response.access_token);
-    if (response.refresh_token) {
-      await env.KV.put('refresh-token', response.refresh_token);
+    await env.KV.put('access-token', res.access_token);
+    if (res.refresh_token) {
+      await env.KV.put('refresh-token', res.refresh_token);
     }
   },
 };
