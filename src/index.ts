@@ -32,7 +32,6 @@ interface SpotifyCurrentlyPlaying {
 		};
 		name?: string;
 	} | null;
-	currently_playing_type?: 'track' | 'episode' | 'ad' | 'unknown';
 }
 
 interface WorkerCurrentlyPlaying {
