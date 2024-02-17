@@ -3,8 +3,8 @@ main = "src/index.ts"
 compatibility_date = "2024-02-08"
 
 [[kv_namespaces]]
-binding = "SPOTIFY_NOW_PLAYING_KV"
-id = "42b3d8e238164f89966d351af22e5958"
+binding = "KV"
+id = "209f72a38bd44a529d99bbce7c13f8cc"
 
 [triggers]
 crons = ["*/30 * * * *"]

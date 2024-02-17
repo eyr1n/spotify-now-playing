@@ -1,8 +1,8 @@
 interface Env {
-	SPOTIFY_CLIENT_ID: string;
-	SPOTIFY_CLIENT_SECRET: string;
-	SPOTIFY_REDIRECT_URL?: string;
-	SPOTIFY_NOW_PLAYING_KV: KVNamespace;
+	CLIENT_ID: string;
+	CLIENT_SECRET: string;
+	REDIRECT_URL?: string;
+	KV: KVNamespace;
 }
 
 interface SpotifyCurrentlyPlaying {
@@ -59,15 +59,15 @@ interface WorkerCurrentlyPlaying {
 export default {
 	// Access Tokenを使用して再生中の音楽を取得
 	async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
-		if (env.SPOTIFY_REDIRECT_URL) {
+		if (env.REDIRECT_URL) {
 			const code = new URL(request.url).searchParams.get('code');
 			if (!code) {
 				return Response.redirect(
 					`https://accounts.spotify.com/authorize?${new URLSearchParams({
 						response_type: 'code',
-						client_id: env.SPOTIFY_CLIENT_ID,
+						client_id: env.CLIENT_ID,
 						scope: 'user-read-currently-playing',
-						redirect_uri: env.SPOTIFY_REDIRECT_URL,
+						redirect_uri: env.REDIRECT_URL,
 					})}`,
 					302
 				);
@@ -77,12 +77,12 @@ export default {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
-					Authorization: `Basic ${btoa(env.SPOTIFY_CLIENT_ID + ':' + env.SPOTIFY_CLIENT_SECRET)}`,
+					Authorization: `Basic ${btoa(env.CLIENT_ID + ':' + env.CLIENT_SECRET)}`,
 				},
 				body: new URLSearchParams({
 					grant_type: 'authorization_code',
 					code: code,
-					redirect_uri: env.SPOTIFY_REDIRECT_URL,
+					redirect_uri: env.REDIRECT_URL,
 				}),
 			}).then((res) => {
 				if (res.status !== 200) {
@@ -91,8 +91,8 @@ export default {
 				return res.json();
 			});
 
-			await env.SPOTIFY_NOW_PLAYING_KV.put('access-token', response.access_token);
-			await env.SPOTIFY_NOW_PLAYING_KV.put('refresh-token', response.refresh_token);
+			await env.KV.put('access-token', response.access_token);
+			await env.KV.put('refresh-token', response.refresh_token);
 
 			return Response.json({
 				access_token: response.access_token,
@@ -100,7 +100,7 @@ export default {
 			});
 		}
 
-		const accessToken = await env.SPOTIFY_NOW_PLAYING_KV.get('access-token');
+		const accessToken = await env.KV.get('access-token');
 		if (!accessToken) {
 			throw new Error('access-token is null');
 		}
@@ -133,7 +133,7 @@ export default {
 
 	// 30分ごとにAccess Tokenを更新
 	async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext) {
-		const refreshToken = await env.SPOTIFY_NOW_PLAYING_KV.get('refresh-token');
+		const refreshToken = await env.KV.get('refresh-token');
 		if (!refreshToken) {
 			throw new Error('refresh-token is null');
 		}
@@ -142,12 +142,12 @@ export default {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-				Authorization: `Basic ${btoa(env.SPOTIFY_CLIENT_ID + ':' + env.SPOTIFY_CLIENT_SECRET)}`,
+				Authorization: `Basic ${btoa(env.CLIENT_ID + ':' + env.CLIENT_SECRET)}`,
 			},
 			body: new URLSearchParams({
 				grant_type: 'refresh_token',
 				refresh_token: refreshToken,
-				client_id: env.SPOTIFY_CLIENT_ID,
+				client_id: env.CLIENT_ID,
 			}),
 		}).then((res) => {
 			if (res.status !== 200) {
@@ -156,9 +156,9 @@ export default {
 			return res.json();
 		});
 
-		await env.SPOTIFY_NOW_PLAYING_KV.put('access-token', response.access_token);
+		await env.KV.put('access-token', response.access_token);
 		if (response.refresh_token) {
-			await env.SPOTIFY_NOW_PLAYING_KV.put('refresh-token', response.refresh_token);
+			await env.KV.put('refresh-token', response.refresh_token);
 		}
 	},
 };
