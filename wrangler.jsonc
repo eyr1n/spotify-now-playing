@@ -24,7 +24,7 @@
   "routes": [
     {
       "pattern": "nowplaying.iwair.in",
-      "zone_name": "iwair.in",
+      "custom_domain": true,
     },
   ],
   /**
