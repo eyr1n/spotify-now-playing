@@ -68,7 +68,7 @@ export default {
             scope: 'user-read-currently-playing',
             redirect_uri: env.REDIRECT_URL,
           })}`,
-          302
+          302,
         );
       }
 
@@ -129,7 +129,7 @@ export default {
     };
     return Response.json(nowPlaying, {
       headers: {
-        'Access-Control-Allow-Origin': 'https://eyrin.jp',
+        'Access-Control-Allow-Origin': 'https://iwair.in',
       },
     });
   },

@@ -17,7 +17,7 @@ REDIRECT_URL=http://localhost:8787
 Cloudflare KV の名前空間を作成する．
 
 ```sh
-npx wrangler kv:namespace create KV
+npx wrangler kv namespace create KV
 ```
 
 `wrangler.toml` に `binding` と `id` を記載後，以下のコマンドでデプロイする．
@@ -25,7 +25,7 @@ npx wrangler kv:namespace create KV
 ```sh
 npx wrangler secret put CLIENT_ID
 npx wrangler secret put CLIENT_SECRET
-npx wrangler kv:key put --binding=KV "access-token" "Access Tokenを記載"
-npx wrangler kv:key put --binding=KV "refresh-token" "Refresh Tokenを記載"
+npx wrangler kv key put --binding=KV --remote "access-token" "Access Tokenを記載"
+npx wrangler kv key put --binding=KV --remote "refresh-token" "Refresh Tokenを記載"
 npm run deploy
 ```
