@@ -21,6 +21,12 @@
       "id": "fa8f9f506098423bbd320708c8272866",
     },
   ],
+  "routes": [
+    {
+      "pattern": "nowplaying.iwair.in",
+      "zone_name": "iwair.in",
+    },
+  ],
   /**
    * Smart Placement
    * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
