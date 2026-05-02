@@ -1,3 +1,5 @@
+import { Hono } from "hono";
+
 interface Env {
   CLIENT_ID: string;
   CLIENT_SECRET: string;
@@ -54,6 +56,8 @@ interface SpotifyNowPlaying {
   progress_ms?: number | null;
   url?: string;
 }
+
+const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 export default {
   // Access Tokenを使用して再生中の音楽を取得

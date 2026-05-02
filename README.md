@@ -7,7 +7,7 @@
 ```
 CLIENT_ID=Client IDを記載
 CLIENT_SECRET=Client Secretを記載
-REDIRECT_URL=http://localhost:8787
+REDIRECT_URL=http://127.0.0.1:8787
 ```
 
 `npm run dev` を実行後 http://localhost:8787 にアクセスし，Access Token と Refresh Token を取得する．
