@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { env } from "hono/adapter";
 import { AuthorizeResponse, TokenResponse } from "./schemas";
 
-const app = new Hono<{ Bindings: Cloudflare.Env & { REDIRECT_URL: string } }>();
+const app = new Hono<{ Bindings: Cloudflare.Env }>();
 
 app.get("/", zValidator("query", AuthorizeResponse), async (c) => {
   const url = new URL(c.req.url);
