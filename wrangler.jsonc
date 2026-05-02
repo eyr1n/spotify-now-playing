@@ -11,10 +11,18 @@
   "secrets": {
     "required": ["CLIENT_ID", "CLIENT_SECRET", "REFRESH_TOKEN"]
   },
-  "kv_namespaces": [
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SPOTIFY_TOKEN",
+        "class_name": "SpotifyToken"
+      }
+    ]
+  },
+  "migrations": [
     {
-      "binding": "KV",
-      "id": "fa8f9f506098423bbd320708c8272866"
+      "tag": "v1",
+      "new_sqlite_classes": ["SpotifyToken"]
     }
   ],
   "triggers": {

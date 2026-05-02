@@ -2,15 +2,15 @@
 
 ## 初回の Access Token, Refresh Token の発行
 
-`.dev.vars` を作成する．
+`.env` を作成する．
 
 ```
 CLIENT_ID=Client IDを記載
 CLIENT_SECRET=Client Secretを記載
-REDIRECT_URL=http://127.0.0.1:8787
+REFRESH_TOKEN=
 ```
 
-`npm run dev` を実行後 http://localhost:8787 にアクセスし，Access Token と Refresh Token を取得する．
+`pnpm run dev` を実行後 http://localhost:8787 にアクセスし，Access Token と Refresh Token を取得する．
 
 ## デプロイ
 

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --test-scheduled",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy --secrets-file .env",
     "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
     "typecheck": "tsc --build",
     "biome": "biome check",
