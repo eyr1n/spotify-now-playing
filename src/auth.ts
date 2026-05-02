@@ -8,6 +8,7 @@ const app = new Hono<{ Bindings: Cloudflare.Env & { REDIRECT_URL: string } }>();
 
 app.get("/", zValidator("query", AuthorizeResponse), async (c) => {
   const url = new URL(c.req.url);
+
   const res = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -29,8 +30,10 @@ app.get("/", zValidator("query", AuthorizeResponse), async (c) => {
     .then((json) => {
       return TokenResponse.parse(json);
     });
+
   console.log(`REFRESH_TOKEN: ${res.refresh_token}`);
-  return c.html("");
+
+  return c.text("success");
 });
 
 serve(app, (info) => {
