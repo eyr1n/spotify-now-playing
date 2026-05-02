@@ -4,26 +4,26 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-05-01",
   "observability": {
-    "enabled": true,
+    "enabled": true
   },
   "upload_source_maps": true,
   "compatibility_flags": ["nodejs_compat"],
   "secrets": {
-    "required": ["CLIENT_ID", "CLIENT_SECRET", "REFRESH_TOKEN"],
+    "required": ["CLIENT_ID", "CLIENT_SECRET", "REFRESH_TOKEN"]
   },
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "fa8f9f506098423bbd320708c8272866",
-    },
+      "id": "fa8f9f506098423bbd320708c8272866"
+    }
   ],
   "triggers": {
-    "crons": ["*/30 * * * *"],
+    "crons": ["*/30 * * * *"]
   },
   "routes": [
     {
       "pattern": "nowplaying.iwair.in",
-      "custom_domain": true,
-    },
-  ],
+      "custom_domain": true
+    }
+  ]
 }

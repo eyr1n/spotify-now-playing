@@ -1,25 +1,25 @@
-import { Hono } from "hono";
-import { env } from "hono/adapter";
-import { cors } from "hono/cors";
-import { CurrentlyPlayingResponse, TokenResponse } from "./schemas.js";
+import { Hono } from 'hono';
+import { env } from 'hono/adapter';
+import { cors } from 'hono/cors';
+import { CurrentlyPlayingResponse, TokenResponse } from './schemas';
 
 const app = new Hono<{ Bindings: Cloudflare.Env }>();
 
 app.use(
-  "*",
+  '*',
   cors({
-    origin: "https://iwair.in",
+    origin: 'https://iwair.in',
   }),
 );
 
-app.get("/", async (c) => {
+app.get('/', async (c) => {
   const accessToken =
-    (await env(c).KV.get("access-token")) ?? (await refreshAccessToken(env(c)));
+    (await env(c).KV.get('access-token')) ?? (await refreshAccessToken(env(c)));
 
   const response = await fetch(
-    "https://api.spotify.com/v1/me/player/currently-playing?market=JP",
+    'https://api.spotify.com/v1/me/player/currently-playing?market=JP',
     {
-      method: "GET",
+      method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
     },
   )
@@ -62,20 +62,20 @@ app.get("/", async (c) => {
 
 async function scheduled(_: ScheduledEvent, env: Cloudflare.Env) {
   const accessToken = await refreshAccessToken(env);
-  await env.KV.put("access-token", accessToken);
+  await env.KV.put('access-token', accessToken);
 }
 
 async function refreshAccessToken(env: Cloudflare.Env) {
-  const refreshToken = (await env.KV.get("refresh-token")) ?? env.REFRESH_TOKEN;
+  const refreshToken = (await env.KV.get('refresh-token')) ?? env.REFRESH_TOKEN;
 
-  const response = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${btoa(env.CLIENT_ID + ":" + env.CLIENT_SECRET)}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${btoa(`${env.CLIENT_ID}:${env.CLIENT_SECRET}`)}`,
     },
     body: new URLSearchParams({
-      grant_type: "refresh_token",
+      grant_type: 'refresh_token',
       refresh_token: refreshToken,
       client_id: env.CLIENT_ID,
     }),
@@ -91,7 +91,7 @@ async function refreshAccessToken(env: Cloudflare.Env) {
     });
 
   if (response.refresh_token) {
-    await env.KV.put("refresh-token", response.refresh_token);
+    await env.KV.put('refresh-token', response.refresh_token);
   }
 
   return response.access_token;

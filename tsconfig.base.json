@@ -10,6 +10,8 @@
     "strict": true,
     "skipLibCheck": true,
     "moduleDetection": "force",
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true
   }
 }

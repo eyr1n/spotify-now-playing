@@ -2,8 +2,8 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "module": "Preserve",
+    "noEmit": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "noEmit": true
+    "jsxImportSource": "hono/jsx"
   }
 }

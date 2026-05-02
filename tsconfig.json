@@ -1,11 +1,4 @@
 {
   "files": [],
-  "references": [
-    {
-      "path": "./node"
-    },
-    {
-      "path": "./worker"
-    }
-  ]
+  "references": [{ "path": "./node" }, { "path": "./worker" }]
 }
