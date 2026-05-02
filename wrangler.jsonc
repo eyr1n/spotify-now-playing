@@ -3,6 +3,9 @@
   "name": "spotify-now-playing",
   "main": "src/index.ts",
   "compatibility_date": "2026-05-01",
+  "vars": {
+    "REDIRECT_URL": "",
+  },
   "observability": {
     "enabled": true,
   },
