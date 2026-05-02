@@ -8,7 +8,7 @@
     "dev": "wrangler dev --test-scheduled",
     "build": "tsc --build",
     "deploy": "wrangler deploy",
-    "cf-typegen": "wrangler types",
+    "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
     "format": "prettier . --write"
   },
   "dependencies": {
