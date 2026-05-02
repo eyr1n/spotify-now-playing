@@ -5,14 +5,14 @@ import { cors } from 'hono/cors';
 import { CurrentlyPlayingResponse, TokenResponse } from './schemas';
 
 export class SpotifyToken extends DurableObject {
-  async get() {
+  async getAccessToken() {
     return (
       (await this.ctx.storage.get<string>('access_token')) ??
-      (await this.refresh())
+      (await this.refreshAccessToken())
     );
   }
 
-  async refresh() {
+  async refreshAccessToken() {
     const refreshToken =
       (await this.ctx.storage.get<string>('refresh_token')) ??
       this.env.REFRESH_TOKEN;
@@ -59,7 +59,7 @@ app.use(
 
 app.get('/', async (c) => {
   const spotifyToken = env(c).SPOTIFY_TOKEN.getByName('spotify_token');
-  const accessToken = await spotifyToken.get();
+  const accessToken = await spotifyToken.getAccessToken();
 
   const response = await fetch(
     'https://api.spotify.com/v1/me/player/currently-playing?market=JP',
@@ -107,8 +107,9 @@ app.get('/', async (c) => {
 
 export default {
   fetch: app.fetch,
+
   async scheduled(_: ScheduledEvent, env: Cloudflare.Env) {
     const spotifyToken = env.SPOTIFY_TOKEN.getByName('spotify_token');
-    await spotifyToken.refresh();
+    await spotifyToken.refreshAccessToken();
   },
 };
