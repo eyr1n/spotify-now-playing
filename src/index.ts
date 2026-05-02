@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { env } from "hono/adapter";
 import { cors } from "hono/cors";
 import { CurrentlyPlayingResponse, TokenResponse } from "./schemas";
 
@@ -45,7 +46,7 @@ app.use(
 
 app.get("/", async (c) => {
   const accessToken =
-    (await c.env.KV.get("access-token")) ?? (await refreshAccessToken(c.env));
+    (await env(c).KV.get("access-token")) ?? (await refreshAccessToken(env(c)));
 
   const response = await fetch(
     "https://api.spotify.com/v1/me/player/currently-playing?market=JP",
