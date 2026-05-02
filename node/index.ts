@@ -1,4 +1,4 @@
-import { serve } from '@hono/node-server';
+import { type HttpBindings, serve } from '@hono/node-server';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { env } from 'hono/adapter';
@@ -6,7 +6,9 @@ import { AuthorizeResponse, NodeEnv, TokenResponse } from './schemas.ts';
 
 const nodeEnv = NodeEnv.parse(process.env);
 
-const app = new Hono<{ Bindings: NodeEnv }>();
+const app = new Hono<{ Bindings: HttpBindings & NodeEnv }>();
+
+let server: ReturnType<typeof serve>;
 
 app.get('/', zValidator('query', AuthorizeResponse), async (c) => {
   const url = new URL(c.req.url);
@@ -33,12 +35,16 @@ app.get('/', zValidator('query', AuthorizeResponse), async (c) => {
       return TokenResponse.parse(json);
     });
 
-  console.log(`REFRESH_TOKEN: ${res.refresh_token}`);
+  console.log(`Refresh Token: ${res.refresh_token}`);
+
+  c.env.outgoing.once('finish', () => {
+    server.close();
+  });
 
   return c.text('success');
 });
 
-serve(app, (info) => {
+server = serve(app, (info) => {
   console.log(
     `https://accounts.spotify.com/authorize?${new URLSearchParams({
       response_type: 'code',
