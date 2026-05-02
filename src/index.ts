@@ -3,38 +3,6 @@ import { env } from "hono/adapter";
 import { cors } from "hono/cors";
 import { CurrentlyPlayingResponse, TokenResponse } from "./schemas";
 
-async function refreshAccessToken(env: Cloudflare.Env) {
-  const refreshToken = (await env.KV.get("refresh-token")) ?? env.REFRESH_TOKEN;
-
-  const response = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${btoa(env.CLIENT_ID + ":" + env.CLIENT_SECRET)}`,
-    },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: env.CLIENT_ID,
-    }),
-  })
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res.json();
-    })
-    .then((json) => {
-      return TokenResponse.parse(json);
-    });
-
-  if (response.refresh_token) {
-    await env.KV.put("refresh-token", response.refresh_token);
-  }
-
-  return response.access_token;
-}
-
 const app = new Hono<{ Bindings: Cloudflare.Env }>();
 
 app.use(
@@ -92,16 +60,44 @@ app.get("/", async (c) => {
   });
 });
 
+async function scheduled(_: ScheduledEvent, env: Cloudflare.Env) {
+  const accessToken = await refreshAccessToken(env);
+  await env.KV.put("access-token", accessToken);
+}
+
+async function refreshAccessToken(env: Cloudflare.Env) {
+  const refreshToken = (await env.KV.get("refresh-token")) ?? env.REFRESH_TOKEN;
+
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${btoa(env.CLIENT_ID + ":" + env.CLIENT_SECRET)}`,
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: env.CLIENT_ID,
+    }),
+  })
+    .then((res) => {
+      if (res.status !== 200) {
+        throw new Error(res.statusText);
+      }
+      return res.json();
+    })
+    .then((json) => {
+      return TokenResponse.parse(json);
+    });
+
+  if (response.refresh_token) {
+    await env.KV.put("refresh-token", response.refresh_token);
+  }
+
+  return response.access_token;
+}
+
 export default {
   fetch: app.fetch,
-
-  // 30分ごとにAccess Tokenを更新
-  async scheduled(
-    _event: ScheduledEvent,
-    env: Cloudflare.Env,
-    _ctx: ExecutionContext,
-  ) {
-    const accessToken = await refreshAccessToken(env);
-    await env.KV.put("access-token", accessToken);
-  },
+  scheduled,
 };
