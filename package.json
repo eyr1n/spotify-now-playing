@@ -4,12 +4,12 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "auth": "tsx --env-file .env src/auth.ts",
     "dev": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types",
     "typecheck": "tsc --noEmit",
-    "format": "prettier . --write",
-    "auth": "tsx --env-file .env src/auth.ts"
+    "format": "prettier . --write"
   },
   "dependencies": {
     "hono": "^4.12.16",
