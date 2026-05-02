@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import { cors } from "hono/cors";
-import { CurrentlyPlayingResponse, TokenResponse } from "./schemas";
+import { CurrentlyPlayingResponse, TokenResponse } from "./schemas.js";
 
 const app = new Hono<{ Bindings: Cloudflare.Env }>();
 

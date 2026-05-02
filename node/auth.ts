@@ -2,9 +2,17 @@ import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
-import { AuthorizeResponse, TokenResponse } from "./schemas";
+import { AuthorizeResponse, TokenResponse } from "./schemas.js";
 
-const app = new Hono<{ Bindings: Cloudflare.Env }>();
+interface Env {
+  Bindings: {
+    CLIENT_ID: never;
+    CLIENT_SECRET: string;
+    REFRESH_TOKEN: string;
+  };
+}
+
+const app = new Hono<Env>();
 
 app.get("/", zValidator("query", AuthorizeResponse), async (c) => {
   const url = new URL(c.req.url);
@@ -40,7 +48,7 @@ serve(app, (info) => {
   console.log(
     `https://accounts.spotify.com/authorize?${new URLSearchParams({
       response_type: "code",
-      client_id: process.env.CLIENT_ID,
+      client_id: process.env.CLIENT_ID as string,
       scope: "user-read-currently-playing",
       redirect_uri: `http://127.0.0.1:${info.port}`,
     })}`,

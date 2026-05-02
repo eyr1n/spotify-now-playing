@@ -6,9 +6,9 @@
   "scripts": {
     "auth": "tsx --env-file .env src/auth.ts",
     "dev": "wrangler dev --test-scheduled",
+    "build": "tsc --build",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types",
-    "typecheck": "tsc --noEmit",
     "format": "prettier . --write"
   },
   "dependencies": {

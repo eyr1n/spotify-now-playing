@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "spotify-now-playing",
-  "main": "src/index.ts",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-05-01",
   "observability": {
     "enabled": true,
