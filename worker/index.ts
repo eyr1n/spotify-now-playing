@@ -2,7 +2,11 @@ import { DurableObject } from 'cloudflare:workers';
 import { Hono } from 'hono';
 import { env } from 'hono/adapter';
 import { cors } from 'hono/cors';
-import { CurrentlyPlayingResponse, TokenResponse } from './schemas';
+import {
+  CurrentlyPlayingResponse,
+  type SpotifyNowPlaying,
+  TokenResponse,
+} from './schemas';
 
 export class SpotifyToken extends DurableObject {
   async getAccessToken() {
@@ -28,23 +32,18 @@ export class SpotifyToken extends DurableObject {
         refresh_token: refreshToken,
         client_id: this.env.CLIENT_ID,
       }),
-    })
-      .then((res) => {
-        if (res.status !== 200) {
-          throw new Error(res.statusText);
-        }
-        return res.json();
-      })
-      .then((json) => {
-        return TokenResponse.parse(json);
-      });
+    });
+    if (response.status !== 200) {
+      throw new Error(response.statusText);
+    }
+    const token = TokenResponse.parse(await response.json());
 
-    await this.ctx.storage.put('access_token', response.access_token);
-    if (response.refresh_token) {
-      await this.ctx.storage.put('refresh_token', response.refresh_token);
+    await this.ctx.storage.put('access_token', token.access_token);
+    if (token.refresh_token) {
+      await this.ctx.storage.put('refresh_token', token.refresh_token);
     }
 
-    return response.access_token;
+    return token.access_token;
   }
 }
 
@@ -62,47 +61,42 @@ app.get('/', async (c) => {
   const accessToken = await spotifyToken.getAccessToken();
 
   const response = await fetch(
-    'https://api.spotify.com/v1/me/player/currently-playing?market=JP',
+    'https://api.spotify.com/v1/me/player/currently-playing',
     {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
     },
-  )
-    .then((res) => {
-      if (res.status === 204) {
-        return {};
-      }
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res.json();
-    })
-    .then((json) => {
-      return CurrentlyPlayingResponse.parse(json);
-    });
+  );
+  if (response.status !== 200) {
+    throw new Error(response.statusText);
+  }
+  const currentlyPlaying = CurrentlyPlayingResponse.parse(
+    await response.json(),
+  );
+  if (currentlyPlaying.item == null) {
+    return c.json(null);
+  }
 
   return c.json({
+    name: currentlyPlaying.item?.name,
+    url: currentlyPlaying.item?.external_urls?.spotify,
     album: {
-      name: response.item?.album?.name,
-      url: response?.item?.album?.external_urls.spotify,
+      name: currentlyPlaying.item.album.name,
+      url: currentlyPlaying.item.album.external_urls.spotify,
     },
-    artists:
-      response.item?.artists?.map((artist) => ({
-        name: artist.name,
-        url: artist.external_urls?.spotify,
-      })) ?? [],
-    duration_ms: response.item?.duration_ms,
-    images:
-      response.item?.album?.images.map((image) => ({
-        url: image.url,
-        height: image.height,
-        width: image.width,
-      })) ?? [],
-    is_playing: response.is_playing,
-    name: response.item?.name,
-    progress_ms: response.progress_ms,
-    url: response.item?.external_urls?.spotify,
-  });
+    artists: currentlyPlaying.item.artists.map((artist) => ({
+      name: artist.name,
+      url: artist.external_urls.spotify,
+    })),
+    images: currentlyPlaying.item.album.images.map((image) => ({
+      url: image.url,
+      width: image.width,
+      height: image.height,
+    })),
+    duration_ms: currentlyPlaying.item.duration_ms,
+    progress_ms: currentlyPlaying.progress_ms,
+    is_playing: currentlyPlaying.is_playing,
+  } satisfies SpotifyNowPlaying);
 });
 
 export default {
