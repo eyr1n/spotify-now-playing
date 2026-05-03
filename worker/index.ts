@@ -49,12 +49,7 @@ export class SpotifyToken extends DurableObject {
 
 const app = new Hono<{ Bindings: Cloudflare.Env }>();
 
-app.use(
-  '*',
-  cors({
-    origin: 'https://iwair.in',
-  }),
-);
+app.use('*', cors());
 
 app.get('/', async (c) => {
   const spotifyToken = env(c).SPOTIFY_TOKEN.getByName('spotify_token');
