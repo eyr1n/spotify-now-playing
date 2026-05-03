@@ -13,7 +13,7 @@ let server: ReturnType<typeof serve>;
 app.get('/', zValidator('query', AuthorizeResponse), async (c) => {
   const url = new URL(c.req.url);
 
-  const res = await fetch('https://accounts.spotify.com/api/token', {
+  const response = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -24,18 +24,13 @@ app.get('/', zValidator('query', AuthorizeResponse), async (c) => {
       code: c.req.valid('query').code,
       redirect_uri: `http://127.0.0.1:${url.port}`,
     }),
-  })
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res.json();
-    })
-    .then((json) => {
-      return TokenResponse.parse(json);
-    });
+  });
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  const token = TokenResponse.parse(await response.json());
 
-  console.log(`Refresh Token: ${res.refresh_token}`);
+  console.log(`Refresh Token: ${token.refresh_token}`);
 
   c.env.outgoing.once('finish', () => {
     server.close();

@@ -33,7 +33,7 @@ export class SpotifyToken extends DurableObject {
         client_id: this.env.CLIENT_ID,
       }),
     });
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new Error(response.statusText);
     }
     const token = TokenResponse.parse(await response.json());
@@ -67,13 +67,13 @@ app.get('/', async (c) => {
       headers: { Authorization: `Bearer ${accessToken}` },
     },
   );
-  if (response.status !== 200) {
+  if (!response.ok) {
     throw new Error(response.statusText);
   }
   const currentlyPlaying = CurrentlyPlayingResponse.parse(
     await response.json(),
   );
-  if (currentlyPlaying.item == null) {
+  if (response.status === 204 || !currentlyPlaying.item) {
     return c.json(null);
   }
 
