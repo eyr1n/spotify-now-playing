@@ -66,13 +66,13 @@ app.get('/', async (c) => {
     throw new Error(response.statusText);
   }
   if (response.status === 204) {
-    return c.json(null);
+    return c.body(null, 204);
   }
   const currentlyPlaying = CurrentlyPlayingResponse.parse(
     await response.json(),
   );
   if (!currentlyPlaying.item) {
-    return c.json(null);
+    return c.body(null, 204);
   }
 
   return c.json({
