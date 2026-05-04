@@ -9,7 +9,7 @@
     "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
     "typecheck": "tsc --build",
     "biome": "biome check",
-    "auth": "node --env-file=.env node/index.ts"
+    "auth": "node --env-file=.env auth/index.ts"
   },
   "dependencies": {
     "hono": "^4.12.16",

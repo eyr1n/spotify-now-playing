@@ -1,4 +1,4 @@
 {
   "files": [],
-  "references": [{ "path": "./node" }, { "path": "./worker" }]
+  "references": [{ "path": "./src" }, { "path": "./auth" }]
 }
