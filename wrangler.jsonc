@@ -30,7 +30,7 @@
   },
   "routes": [
     {
-      "pattern": "nowplaying.iwair.in",
+      "pattern": "nowplaying.eyrin.jp",
       "custom_domain": true
     }
   ]
