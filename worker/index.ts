@@ -4,6 +4,8 @@ import { env } from 'hono/adapter';
 import { cors } from 'hono/cors';
 import {
   CurrentlyPlayingResponse,
+  RecentlyPlayedResponse,
+  type SpotifyLastPlayed,
   type SpotifyNowPlaying,
   TokenResponse,
 } from './schemas';
@@ -95,6 +97,49 @@ app.get('/', async (c) => {
     progress_ms: currentlyPlaying.progress_ms,
     is_playing: currentlyPlaying.is_playing,
   } satisfies SpotifyNowPlaying);
+});
+
+app.get('/last-played', async (c) => {
+  const spotifyToken = env(c).SPOTIFY_TOKEN.getByName('spotify_token');
+  const accessToken = await spotifyToken.getAccessToken();
+
+  const response = await fetch(
+    'https://api.spotify.com/v1/me/player/recently-played?limit=1',
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  const recentlyPlayed = RecentlyPlayedResponse.parse(await response.json());
+  const item = recentlyPlayed.items[0];
+  if (!item) {
+    return c.body(null, 204);
+  }
+  const { track, played_at } = item;
+
+  return c.json({
+    name: track.name,
+    url: track.external_urls.spotify,
+    album: {
+      name: track.album.name,
+      url: track.album.external_urls.spotify,
+    },
+    artists: track.artists.map((artist) => ({
+      name: artist.name,
+      url: artist.external_urls.spotify,
+    })),
+    images: track.album.images.map((image) => ({
+      url: image.url,
+      width: image.width,
+      height: image.height,
+    })),
+    duration_ms: track.duration_ms,
+    progress_ms: null,
+    played_at,
+  } satisfies SpotifyLastPlayed);
 });
 
 export default {

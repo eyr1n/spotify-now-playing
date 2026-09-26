@@ -39,13 +39,16 @@ app.get('/', zValidator('query', AuthorizeResponse), async (c) => {
   return c.text('success');
 });
 
-server = serve(app, (info) => {
-  console.log(
-    `https://accounts.spotify.com/authorize?${new URLSearchParams({
-      response_type: 'code',
-      client_id: nodeEnv.CLIENT_ID,
-      scope: 'user-read-currently-playing',
-      redirect_uri: `http://127.0.0.1:${info.port}`,
-    })}`,
-  );
-});
+server = serve(
+  { fetch: app.fetch, hostname: '127.0.0.1', port: 3000 },
+  (info) => {
+    console.log(
+      `https://accounts.spotify.com/authorize?${new URLSearchParams({
+        response_type: 'code',
+        client_id: nodeEnv.CLIENT_ID,
+        scope: 'user-read-currently-playing user-read-recently-played',
+        redirect_uri: `http://127.0.0.1:${info.port}`,
+      })}`,
+    );
+  },
+);

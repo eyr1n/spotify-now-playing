@@ -46,6 +46,17 @@ export const CurrentlyPlayingResponse = z.object({
 
 export type CurrentlyPlayingResponse = z.infer<typeof CurrentlyPlayingResponse>;
 
+export const RecentlyPlayedResponse = z.object({
+  items: z.array(
+    z.object({
+      track: TrackObject,
+      played_at: z.string(),
+    }),
+  ),
+});
+
+export type RecentlyPlayedResponse = z.infer<typeof RecentlyPlayedResponse>;
+
 export interface SpotifyNowPlaying {
   name: string;
   url: string;
@@ -65,4 +76,25 @@ export interface SpotifyNowPlaying {
   duration_ms: number;
   progress_ms: number | null;
   is_playing: boolean;
+}
+
+export interface SpotifyLastPlayed {
+  name: string;
+  url: string;
+  album: {
+    name: string;
+    url: string;
+  };
+  artists: {
+    name: string;
+    url: string;
+  }[];
+  images: {
+    url: string;
+    width: number | null;
+    height: number | null;
+  }[];
+  duration_ms: number;
+  progress_ms: number | null;
+  played_at: string;
 }
