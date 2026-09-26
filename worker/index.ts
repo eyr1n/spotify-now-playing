@@ -137,7 +137,6 @@ app.get('/last-played', async (c) => {
       height: image.height,
     })),
     duration_ms: track.duration_ms,
-    progress_ms: null,
     played_at,
   } satisfies SpotifyLastPlayed);
 });

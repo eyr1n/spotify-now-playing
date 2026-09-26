@@ -95,6 +95,5 @@ export interface SpotifyLastPlayed {
     height: number | null;
   }[];
   duration_ms: number;
-  progress_ms: number | null;
   played_at: string;
 }
